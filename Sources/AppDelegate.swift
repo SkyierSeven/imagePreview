@@ -4,6 +4,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var model: ViewerModel?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Clear any previously forced app language so menus follow the system.
+        UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+
         NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -12,7 +15,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard let url = urls.first else { return }
         Task { @MainActor in
             model?.open(url: url)
-            // Bring the single window forward instead of spawning another.
             if let window = NSApp.windows.first(where: { $0.isVisible }) ?? NSApp.windows.first {
                 window.makeKeyAndOrderFront(nil)
             }
@@ -27,7 +29,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
-    /// Prevent macOS from opening additional untitled windows for document opens.
     func applicationShouldOpenUntitledFile(_ sender: NSApplication) -> Bool {
         false
     }

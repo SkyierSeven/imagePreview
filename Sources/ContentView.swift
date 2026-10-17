@@ -146,71 +146,90 @@ struct ContentView: View {
         }
         .toolbar(reading.immersive ? .hidden : .automatic)
         .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
-                    Button {
-                        reading.toggleImmersive()
-                    } label: {
-                        Label(
-                            reading.immersive ? "退出沉浸" : "沉浸阅读",
-                            systemImage: reading.immersive ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right"
-                        )
-                    }
-
-                    Toggle(isOn: $reading.rightToLeft) {
-                        Label("从右到左（日漫）", systemImage: "book.pages")
-                    }
-
-                    Divider()
-
-                    Picker(
-                        "显示模式",
-                        selection: Binding(
-                            get: { model.displayMode },
-                            set: { model.setDisplayMode($0) }
-                        )
-                    ) {
-                        ForEach(DisplayMode.allCases) { mode in
-                            Label(mode.title, systemImage: mode.symbolName)
-                                .tag(mode)
-                                .help(mode.tip)
-                        }
-                    }
-
-                    Divider()
-
-                    Button {
-                        model.rotateClockwise()
-                    } label: {
-                        Label("顺时针旋转", systemImage: "rotate.right")
-                    }
-                    .disabled(!model.hasImage)
-
-                    Button {
-                        model.rotateCounterclockwise()
-                    } label: {
-                        Label("逆时针旋转", systemImage: "rotate.left")
-                    }
-                    .disabled(!model.hasImage)
-
-                    Divider()
-
-                    Button("自定义切图快捷键…") {
-                        showShortcutSettings = true
-                    }
-                } label: {
-                    Text("更多")
-                        .font(.system(size: 13))
-                }
-                .help("沉浸、阅读方向、显示与快捷键")
-                .menuIndicator(.hidden)
-            }
+            moreToolbarItem
         }
         .toolbarBackground(.visible, for: .windowToolbar)
-        .toolbarBackground(Color(nsColor: NSColor.windowBackgroundColor), for: .windowToolbar)
+        .toolbarBackground(Color.black, for: .windowToolbar)
+        .preferredColorScheme(.dark)
         .sheet(isPresented: $showShortcutSettings) {
             ShortcutSettingsView(settings: shortcuts)
         }
+    }
+
+    @ToolbarContentBuilder
+    private var moreToolbarItem: some ToolbarContent {
+        if #available(macOS 26.0, *) {
+            ToolbarItem(placement: .primaryAction) {
+                moreMenu
+            }
+            .sharedBackgroundVisibility(.hidden)
+        } else {
+            ToolbarItem(placement: .primaryAction) {
+                moreMenu
+            }
+        }
+    }
+
+    private var moreMenu: some View {
+        Menu {
+            Button {
+                reading.toggleImmersive()
+            } label: {
+                Label(
+                    reading.immersive ? "退出沉浸" : "沉浸阅读",
+                    systemImage: reading.immersive ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right"
+                )
+            }
+
+            Toggle(isOn: $reading.rightToLeft) {
+                Label("从右到左（日漫）", systemImage: "book.pages")
+            }
+
+            Divider()
+
+            Picker(
+                "显示模式",
+                selection: Binding(
+                    get: { model.displayMode },
+                    set: { model.setDisplayMode($0) }
+                )
+            ) {
+                ForEach(DisplayMode.allCases) { mode in
+                    Label(mode.title, systemImage: mode.symbolName)
+                        .tag(mode)
+                        .help(mode.tip)
+                }
+            }
+
+            Divider()
+
+            Button {
+                model.rotateClockwise()
+            } label: {
+                Label("顺时针旋转", systemImage: "rotate.right")
+            }
+            .disabled(!model.hasImage)
+
+            Button {
+                model.rotateCounterclockwise()
+            } label: {
+                Label("逆时针旋转", systemImage: "rotate.left")
+            }
+            .disabled(!model.hasImage)
+
+            Divider()
+
+            Button("自定义切图快捷键…") {
+                showShortcutSettings = true
+            }
+        } label: {
+            Text("更多")
+                .font(.system(size: 13))
+        }
+        .buttonStyle(.borderless)
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .help("沉浸、阅读方向、显示与快捷键")
     }
 
     private func bumpSideControls() {
@@ -310,22 +329,21 @@ private struct WindowChromeConfigurator: NSViewRepresentable {
             let immersiveChanged = lastImmersive != immersive
             lastImmersive = immersive
 
+            // Pure black chrome (avoid system dark-gray titlebar material).
+            window.backgroundColor = .black
+            window.appearance = NSAppearance(named: .darkAqua)
+            window.titlebarAppearsTransparent = true
+            window.styleMask.insert(.fullSizeContentView)
+            window.toolbarStyle = .unifiedCompact
+            window.titlebarSeparatorStyle = .none
+
             if immersive {
                 window.titleVisibility = .hidden
-                window.titlebarAppearsTransparent = true
-                window.styleMask.insert(.fullSizeContentView)
-                window.titlebarSeparatorStyle = .none
                 if immersiveChanged, !window.styleMask.contains(.fullScreen) {
                     window.toggleFullScreen(nil)
                 }
             } else {
                 window.titleVisibility = .visible
-                window.titlebarAppearsTransparent = false
-                window.toolbarStyle = .unifiedCompact
-                window.titlebarSeparatorStyle = .line
-                if window.styleMask.contains(.fullSizeContentView) {
-                    window.styleMask.remove(.fullSizeContentView)
-                }
                 if immersiveChanged, window.styleMask.contains(.fullScreen) {
                     window.toggleFullScreen(nil)
                 }

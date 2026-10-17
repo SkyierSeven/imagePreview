@@ -1,0 +1,66 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "about_app" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "About imagePreview" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "关于 imagePreview" } }
+      }
+    },
+    "hide_app" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Hide imagePreview" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "隐藏 imagePreview" } }
+      }
+    },
+    "hide_others" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Hide Others" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "隐藏其他" } }
+      }
+    },
+    "show_all" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Show All" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "显示全部" } }
+      }
+    },
+    "quit_app" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Quit imagePreview" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "退出 imagePreview" } }
+      }
+    },
+    "app_help" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "imagePreview Help" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "imagePreview 帮助" } }
+      }
+    },
+    "open…" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open…" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "打开…" } }
+      }
+    },
+    "open_image_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open Image" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "打开图片" } }
+      }
+    },
+    "open_image_message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Choose an image" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "选择一张图片" } }
+      }
+    },
+    "open_image_prompt" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Open" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "打开" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}
