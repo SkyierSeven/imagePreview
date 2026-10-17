@@ -39,6 +39,7 @@ final class ModeImageView: NSView {
         imageLayer.contentsGravity = .resize
         imageLayer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         layer?.addSublayer(imageLayer)
+        focusRingType = .none
     }
 
     @available(*, unavailable)

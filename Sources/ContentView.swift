@@ -6,50 +6,46 @@ struct ContentView: View {
     @Bindable var model: ViewerModel
 
     var body: some View {
-        VStack(spacing: 0) {
-            toolbar
+        ZStack {
+            Color(nsColor: NSColor(calibratedWhite: 0.12, alpha: 1))
 
-            ZStack {
-                Color(nsColor: NSColor(calibratedWhite: 0.12, alpha: 1))
-
-                if let loaded = model.loadedImage {
-                    ImageCanvasView(
-                        image: loaded.cgImage,
-                        pixelSize: loaded.pixelSize,
-                        displayMode: model.displayMode,
-                        rotationDegrees: model.rotationDegrees
-                    )
-                    .clipShape(Rectangle())
-                } else {
-                    VStack(spacing: 12) {
-                        Image(systemName: "photo.on.rectangle.angled")
-                            .font(.system(size: 48))
-                            .foregroundStyle(.secondary)
-                        Text("拖入图片，或 ⌘O 打开")
-                            .foregroundStyle(.secondary)
-                        if let error = model.errorMessage {
-                            Text(error)
-                                .foregroundStyle(.red)
-                                .font(.callout)
-                        }
+            if let loaded = model.loadedImage {
+                ImageCanvasView(
+                    image: loaded.cgImage,
+                    pixelSize: loaded.pixelSize,
+                    displayMode: model.displayMode,
+                    rotationDegrees: model.rotationDegrees
+                )
+                .clipShape(Rectangle())
+            } else {
+                VStack(spacing: 12) {
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.system(size: 48))
+                        .foregroundStyle(.secondary)
+                    Text("拖入图片，或 ⌘O 打开")
+                        .foregroundStyle(.secondary)
+                    if let error = model.errorMessage {
+                        Text(error)
+                            .foregroundStyle(.red)
+                            .font(.callout)
                     }
                 }
-
-                if model.isLoading {
-                    ProgressView()
-                        .controlSize(.small)
-                        .padding(8)
-                        .background(.ultraThinMaterial, in: Capsule())
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                        .padding()
-                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            if model.isLoading {
+                ProgressView()
+                    .controlSize(.small)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                    .padding(12)
+            }
         }
         .frame(minWidth: 480, minHeight: 320)
-        .background(WindowTitleUpdater(title: model.windowTitle))
+        // Single source of truth for the title — do not also poke NSWindow.title.
+        .navigationTitle(model.windowTitle)
+        .background(WindowChromeConfigurator(fileURL: model.navigator?.currentURL))
         .onDrop(of: [UTType.fileURL], isTargeted: nil, perform: handleDrop)
         .focusable()
+        .focusEffectDisabled()
         .onKeyPress(.leftArrow) {
             model.goPrevious()
             return .handled
@@ -82,48 +78,48 @@ struct ContentView: View {
             }
             return .handled
         }
-    }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Picker(
+                        "显示模式",
+                        selection: Binding(
+                            get: { model.displayMode },
+                            set: { model.setDisplayMode($0) }
+                        )
+                    ) {
+                        ForEach(DisplayMode.allCases) { mode in
+                            Label(mode.title, systemImage: mode.symbolName)
+                                .tag(mode)
+                                .help(mode.tip)
+                        }
+                    }
 
-    private var toolbar: some View {
-        HStack(spacing: 10) {
-            Picker("显示模式", selection: Binding(
-                get: { model.displayMode },
-                set: { model.setDisplayMode($0) }
-            )) {
-                ForEach(DisplayMode.allCases) { mode in
-                    Text(mode.title).tag(mode)
+                    Divider()
+
+                    Button {
+                        model.rotateClockwise()
+                    } label: {
+                        Label("顺时针旋转", systemImage: "rotate.right")
+                    }
+                    .disabled(!model.hasImage)
+
+                    Button {
+                        model.rotateCounterclockwise()
+                    } label: {
+                        Label("逆时针旋转", systemImage: "rotate.left")
+                    }
+                    .disabled(!model.hasImage)
+                } label: {
+                    Text("更多")
+                        .font(.system(size: 13))
                 }
-            }
-            .pickerStyle(.segmented)
-            .frame(maxWidth: 420)
-
-            Button {
-                model.rotateCounterclockwise()
-            } label: {
-                Image(systemName: "rotate.left")
-            }
-            .help("逆时针旋转")
-            .disabled(!model.hasImage)
-
-            Button {
-                model.rotateClockwise()
-            } label: {
-                Image(systemName: "rotate.right")
-            }
-            .help("顺时针旋转")
-            .disabled(!model.hasImage)
-
-            Spacer(minLength: 8)
-
-            if let nav = model.navigator {
-                Text(nav.positionLabel)
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                .help("显示模式与旋转")
+                .menuIndicator(.hidden)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(.bar)
+        .toolbarBackground(.visible, for: .windowToolbar)
+        .toolbarBackground(Color(nsColor: NSColor.windowBackgroundColor), for: .windowToolbar)
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
@@ -145,17 +141,32 @@ struct ContentView: View {
     }
 }
 
-/// Keeps the single NSWindow title in sync with the current file.
-private struct WindowTitleUpdater: NSViewRepresentable {
-    let title: String
+/// Configures titlebar chrome once; never writes `window.title` (avoids fighting SwiftUI).
+private struct WindowChromeConfigurator: NSViewRepresentable {
+    var fileURL: URL?
 
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
-        DispatchQueue.main.async { view.window?.title = title }
+        DispatchQueue.main.async { Self.apply(fileURL: fileURL, to: view.window) }
         return view
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
-        DispatchQueue.main.async { nsView.window?.title = title }
+        DispatchQueue.main.async { Self.apply(fileURL: fileURL, to: nsView.window) }
+    }
+
+    private static func apply(fileURL: URL?, to window: NSWindow?) {
+        guard let window else { return }
+        window.titleVisibility = .visible
+        window.titlebarAppearsTransparent = false
+        window.toolbarStyle = .unifiedCompact
+        window.titlebarSeparatorStyle = .line
+        if window.styleMask.contains(.fullSizeContentView) {
+            window.styleMask.remove(.fullSizeContentView)
+        }
+        // Proxy icon only — does not own the title string.
+        if window.representedURL != fileURL {
+            window.representedURL = fileURL
+        }
     }
 }

@@ -17,11 +17,19 @@ final class ViewerModel {
     private var loadTask: Task<Void, Never>?
     private var generation = 0
 
+    var fileName: String {
+        navigator?.currentURL?.lastPathComponent ?? "imagePreview"
+    }
+
+    var positionLabel: String? {
+        navigator?.positionLabel
+    }
+
     var windowTitle: String {
-        guard let nav = navigator, let url = nav.currentURL else {
-            return "imagePreview"
+        if let positionLabel {
+            return "\(fileName) — \(positionLabel)"
         }
-        return "\(url.lastPathComponent) — \(nav.positionLabel)"
+        return fileName
     }
 
     var hasImage: Bool { loadedImage != nil }

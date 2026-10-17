@@ -6,8 +6,9 @@ struct imagePreviewApp: App {
     @State private var model = ViewerModel()
 
     var body: some Scene {
-        // Single window — reopening a file replaces content via AppDelegate / openURL.
-        Window("imagePreview", id: "main") {
+        // Title comes from ContentView.navigationTitle(model.windowTitle) — keep Window title empty
+        // so SwiftUI does not keep resetting it to "imagePreview" and causing flicker.
+        Window(model.windowTitle, id: "main") {
             ContentView(model: model)
                 .onAppear {
                     appDelegate.model = model
@@ -15,6 +16,7 @@ struct imagePreviewApp: App {
                 }
         }
         .defaultSize(width: 960, height: 640)
+        .windowToolbarStyle(.unifiedCompact)
         .commands {
             CommandGroup(replacing: .newItem) {
                 Button("打开…") {
