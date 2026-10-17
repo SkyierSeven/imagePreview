@@ -6,50 +6,45 @@ struct ContentView: View {
     @Bindable var model: ViewerModel
 
     var body: some View {
-        ZStack {
-            Color(nsColor: NSColor(calibratedWhite: 0.12, alpha: 1))
-                .ignoresSafeArea()
+        VStack(spacing: 0) {
+            toolbar
 
-            if let loaded = model.loadedImage {
-                ImageCanvasView(
-                    image: loaded.cgImage,
-                    pixelSize: loaded.pixelSize,
-                    displayMode: model.displayMode,
-                    rotationDegrees: model.rotationDegrees,
-                    userScale: model.userScale,
-                    isCustomZoom: model.isCustomZoom,
-                    onUserScaleChange: { scale in
-                        model.isCustomZoom = scale != 1
-                        model.userScale = scale
-                        if scale == 1 {
-                            model.isCustomZoom = false
+            ZStack {
+                Color(nsColor: NSColor(calibratedWhite: 0.12, alpha: 1))
+
+                if let loaded = model.loadedImage {
+                    ImageCanvasView(
+                        image: loaded.cgImage,
+                        pixelSize: loaded.pixelSize,
+                        displayMode: model.displayMode,
+                        rotationDegrees: model.rotationDegrees
+                    )
+                    .clipShape(Rectangle())
+                } else {
+                    VStack(spacing: 12) {
+                        Image(systemName: "photo.on.rectangle.angled")
+                            .font(.system(size: 48))
+                            .foregroundStyle(.secondary)
+                        Text("拖入图片，或 ⌘O 打开")
+                            .foregroundStyle(.secondary)
+                        if let error = model.errorMessage {
+                            Text(error)
+                                .foregroundStyle(.red)
+                                .font(.callout)
                         }
                     }
-                )
-                .clipShape(Rectangle())
-            } else {
-                VStack(spacing: 12) {
-                    Image(systemName: "photo.on.rectangle.angled")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.secondary)
-                    Text("拖入图片，或 ⌘O 打开")
-                        .foregroundStyle(.secondary)
-                    if let error = model.errorMessage {
-                        Text(error)
-                            .foregroundStyle(.red)
-                            .font(.callout)
-                    }
+                }
+
+                if model.isLoading {
+                    ProgressView()
+                        .controlSize(.small)
+                        .padding(8)
+                        .background(.ultraThinMaterial, in: Capsule())
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        .padding()
                 }
             }
-
-            if model.isLoading {
-                ProgressView()
-                    .controlSize(.small)
-                    .padding(8)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-                    .padding()
-            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(minWidth: 480, minHeight: 320)
         .background(WindowTitleUpdater(title: model.windowTitle))
@@ -87,14 +82,48 @@ struct ContentView: View {
             }
             return .handled
         }
-        .onKeyPress(keys: [.init("="), .init("+")]) { _ in
-            model.zoomIn()
-            return .handled
+    }
+
+    private var toolbar: some View {
+        HStack(spacing: 10) {
+            Picker("显示模式", selection: Binding(
+                get: { model.displayMode },
+                set: { model.setDisplayMode($0) }
+            )) {
+                ForEach(DisplayMode.allCases) { mode in
+                    Text(mode.title).tag(mode)
+                }
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 420)
+
+            Button {
+                model.rotateCounterclockwise()
+            } label: {
+                Image(systemName: "rotate.left")
+            }
+            .help("逆时针旋转")
+            .disabled(!model.hasImage)
+
+            Button {
+                model.rotateClockwise()
+            } label: {
+                Image(systemName: "rotate.right")
+            }
+            .help("顺时针旋转")
+            .disabled(!model.hasImage)
+
+            Spacer(minLength: 8)
+
+            if let nav = model.navigator {
+                Text(nav.positionLabel)
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
         }
-        .onKeyPress(keys: [.init("-")]) { _ in
-            model.zoomOut()
-            return .handled
-        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.bar)
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {

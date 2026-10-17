@@ -8,11 +8,10 @@ Built with SwiftUI + AppKit. Replaces the awkward “open one file, stuck on one
 
 - **Folder association**: opening a file builds a same-directory image list; ← / → moves previous / next (stops at ends)
 - **Single window**: opening another image replaces the current one — no window spam
-- **Display modes**: Fit / Fill / Actual size / Stretch
+- **Display modes**: toolbar buttons for Fit / Fill / Actual size / Stretch (no free zoom/drag resize)
 - **Rotation**: display-only; kept when switching images
-- **Zoom & pan**: pinch, scroll wheel, `+` / `-`
 
-No crop, edit, delete, or export.
+No crop, edit, delete, free zoom, or export.
 
 ## Requirements
 
@@ -44,9 +43,7 @@ open build/Build/Products/Release/imagePreview.app
 | 1 | Actual size |
 | S | Stretch |
 | R / Shift+R | Rotate CW / CCW |
-| + / - | Zoom in / out |
 | ⌘O | Open… |
-| Double-click | Reset zoom |
 
 ## Supported formats
 

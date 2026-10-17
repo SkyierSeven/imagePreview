@@ -31,15 +31,6 @@ struct imagePreviewApp: App {
 
                 Divider()
 
-                Button("放大") { model.zoomIn() }
-                    .keyboardShortcut("=", modifiers: .command)
-                Button("缩小") { model.zoomOut() }
-                    .keyboardShortcut("-", modifiers: .command)
-                Button("重置缩放") { model.resetZoom() }
-                    .keyboardShortcut("0", modifiers: [.command])
-
-                Divider()
-
                 Button("顺时针旋转") { model.rotateClockwise() }
                     .keyboardShortcut("r", modifiers: .command)
                 Button("逆时针旋转") { model.rotateCounterclockwise() }
