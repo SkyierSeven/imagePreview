@@ -37,7 +37,9 @@ open build/Build/Products/Release/imagePreview.app
 
 | Key | Action |
 |-----|--------|
-| ← / → | Previous / next image |
+| ← → ↑ ↓ | Previous / next image (built-in, always on) |
+| Custom | Extra prev/next keys via 更多 → 自定义切图快捷键 |
+| Side buttons | Appear on mouse move; hide after 2s idle |
 | 0 | Fit |
 | F | Fill |
 | 1 | Actual size |

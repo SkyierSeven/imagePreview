@@ -4,6 +4,14 @@ import UniformTypeIdentifiers
 
 struct ContentView: View {
     @Bindable var model: ViewerModel
+    @Bindable private var shortcuts = ShortcutSettings.shared
+
+    @State private var sideControlsVisible = true
+    @State private var hideSideControlsTask: Task<Void, Never>?
+    @State private var showShortcutSettings = false
+
+    /// Idle seconds before side nav buttons fade out.
+    private let sideControlsHideDelay: Duration = .seconds(2)
 
     var body: some View {
         ZStack {
@@ -32,6 +40,19 @@ struct ContentView: View {
                 }
             }
 
+            SideNavButtons(
+                canGoPrevious: model.navigator?.canGoPrevious ?? false,
+                canGoNext: model.navigator?.canGoNext ?? false,
+                visible: sideControlsVisible && model.navigator != nil,
+                onPrevious: { model.goPrevious() },
+                onNext: { model.goNext() }
+            )
+
+            MouseActivityMonitor {
+                bumpSideControls()
+            }
+            .allowsHitTesting(false)
+
             if model.isLoading {
                 ProgressView()
                     .controlSize(.small)
@@ -40,12 +61,13 @@ struct ContentView: View {
             }
         }
         .frame(minWidth: 480, minHeight: 320)
-        // Single source of truth for the title — do not also poke NSWindow.title.
         .navigationTitle(model.windowTitle)
         .background(WindowChromeConfigurator(fileURL: model.navigator?.currentURL))
         .onDrop(of: [UTType.fileURL], isTargeted: nil, perform: handleDrop)
         .focusable()
         .focusEffectDisabled()
+        .onAppear { bumpSideControls() }
+        // Built-in arrows — always on, not customizable / not removable.
         .onKeyPress(.leftArrow) {
             model.goPrevious()
             return .handled
@@ -53,6 +75,26 @@ struct ContentView: View {
         .onKeyPress(.rightArrow) {
             model.goNext()
             return .handled
+        }
+        .onKeyPress(.upArrow) {
+            model.goPrevious()
+            return .handled
+        }
+        .onKeyPress(.downArrow) {
+            model.goNext()
+            return .handled
+        }
+        // Extra user-defined shortcuts.
+        .onKeyPress { press in
+            if shortcuts.matchesPrevious(press) {
+                model.goPrevious()
+                return .handled
+            }
+            if shortcuts.matchesNext(press) {
+                model.goNext()
+                return .handled
+            }
+            return .ignored
         }
         .onKeyPress(keys: [.init("0")]) { _ in
             model.setDisplayMode(.fit)
@@ -110,16 +152,37 @@ struct ContentView: View {
                         Label("逆时针旋转", systemImage: "rotate.left")
                     }
                     .disabled(!model.hasImage)
+
+                    Divider()
+
+                    Button("自定义切图快捷键…") {
+                        showShortcutSettings = true
+                    }
                 } label: {
                     Text("更多")
                         .font(.system(size: 13))
                 }
-                .help("显示模式与旋转")
+                .help("显示模式、旋转与快捷键")
                 .menuIndicator(.hidden)
             }
         }
         .toolbarBackground(.visible, for: .windowToolbar)
         .toolbarBackground(Color(nsColor: NSColor.windowBackgroundColor), for: .windowToolbar)
+        .sheet(isPresented: $showShortcutSettings) {
+            ShortcutSettingsView(settings: shortcuts)
+        }
+    }
+
+    private func bumpSideControls() {
+        sideControlsVisible = true
+        hideSideControlsTask?.cancel()
+        hideSideControlsTask = Task { @MainActor in
+            try? await Task.sleep(for: sideControlsHideDelay)
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.2)) {
+                sideControlsVisible = false
+            }
+        }
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
@@ -164,7 +227,6 @@ private struct WindowChromeConfigurator: NSViewRepresentable {
         if window.styleMask.contains(.fullSizeContentView) {
             window.styleMask.remove(.fullSizeContentView)
         }
-        // Proxy icon only — does not own the title string.
         if window.representedURL != fileURL {
             window.representedURL = fileURL
         }
