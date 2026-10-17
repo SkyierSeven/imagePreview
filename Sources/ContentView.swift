@@ -158,15 +158,8 @@ struct ContentView: View {
 
     @ToolbarContentBuilder
     private var moreToolbarItem: some ToolbarContent {
-        if #available(macOS 26.0, *) {
-            ToolbarItem(placement: .primaryAction) {
-                moreMenu
-            }
-            .sharedBackgroundVisibility(.hidden)
-        } else {
-            ToolbarItem(placement: .primaryAction) {
-                moreMenu
-            }
+        ToolbarItem(placement: .primaryAction) {
+            moreMenu
         }
     }
 

@@ -18,9 +18,7 @@ struct imagePreviewApp: App {
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button(String(localized: "about_app")) {
-                    NSApp.orderFrontStandardAboutPanel(options: [
-                        .applicationName: "imagePreview",
-                    ])
+                    NSApp.orderFrontStandardAboutPanel(nil)
                 }
             }
 
