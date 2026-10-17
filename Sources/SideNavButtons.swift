@@ -2,29 +2,32 @@ import SwiftUI
 
 /// Left / right peek buttons that auto-hide after the mouse stops moving.
 struct SideNavButtons: View {
-    var canGoPrevious: Bool
-    var canGoNext: Bool
+    var canGoLeading: Bool
+    var canGoTrailing: Bool
     var visible: Bool
-    var onPrevious: () -> Void
-    var onNext: () -> Void
+    var immersive: Bool
+    var leadingHelp: String
+    var trailingHelp: String
+    var onLeading: () -> Void
+    var onTrailing: () -> Void
 
     var body: some View {
         HStack {
             navButton(
                 systemName: "chevron.left",
-                enabled: canGoPrevious,
-                help: "上一张",
-                action: onPrevious
+                enabled: canGoLeading,
+                help: leadingHelp,
+                action: onLeading
             )
             Spacer()
             navButton(
                 systemName: "chevron.right",
-                enabled: canGoNext,
-                help: "下一张",
-                action: onNext
+                enabled: canGoTrailing,
+                help: trailingHelp,
+                action: onTrailing
             )
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, immersive ? 6 : 12)
         .opacity(visible ? 1 : 0)
         .allowsHitTesting(visible)
         .animation(.easeInOut(duration: 0.2), value: visible)
@@ -38,10 +41,13 @@ struct SideNavButtons: View {
     ) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: 36, height: 56)
-                .background(Color.black.opacity(enabled ? 0.35 : 0.15), in: RoundedRectangle(cornerRadius: 8))
+                .font(.system(size: immersive ? 14 : 18, weight: .semibold))
+                .foregroundStyle(.white.opacity(immersive ? 0.85 : 1))
+                .frame(width: immersive ? 28 : 36, height: immersive ? 48 : 56)
+                .background(
+                    Color.black.opacity(immersive ? (enabled ? 0.22 : 0.08) : (enabled ? 0.35 : 0.15)),
+                    in: RoundedRectangle(cornerRadius: immersive ? 6 : 8)
+                )
         }
         .buttonStyle(.plain)
         .disabled(!enabled)

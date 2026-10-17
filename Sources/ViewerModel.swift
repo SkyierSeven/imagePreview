@@ -34,6 +34,9 @@ final class ViewerModel {
 
     var hasImage: Bool { loadedImage != nil }
 
+    var canGoPrevious: Bool { navigator?.canGoPrevious ?? false }
+    var canGoNext: Bool { navigator?.canGoNext ?? false }
+
     func open(url: URL) {
         let standardized = url.standardizedFileURL
         guard SupportedFormats.isImageExtension(standardized) || SupportedFormats.canDecode(standardized) else {
@@ -56,6 +59,16 @@ final class ViewerModel {
         guard let next = navigator?.next() else { return }
         navigator = next
         loadCurrent()
+    }
+
+    /// Spatial left (← key / left button). Honors RTL manga reading.
+    func navigateLeading(rtl: Bool) {
+        rtl ? goNext() : goPrevious()
+    }
+
+    /// Spatial right (→ key / right button). Honors RTL manga reading.
+    func navigateTrailing(rtl: Bool) {
+        rtl ? goPrevious() : goNext()
     }
 
     func setDisplayMode(_ mode: DisplayMode) {

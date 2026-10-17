@@ -7,12 +7,16 @@ struct ImageCanvasView: NSViewRepresentable {
     var pixelSize: CGSize
     var displayMode: DisplayMode
     var rotationDegrees: Double
+    var onDoubleClick: (() -> Void)?
 
     func makeNSView(context: Context) -> ModeImageView {
-        ModeImageView()
+        let view = ModeImageView()
+        view.onDoubleClick = onDoubleClick
+        return view
     }
 
     func updateNSView(_ nsView: ModeImageView, context: Context) {
+        nsView.onDoubleClick = onDoubleClick
         nsView.apply(
             image: image,
             pixelSize: pixelSize,
@@ -23,6 +27,8 @@ struct ImageCanvasView: NSViewRepresentable {
 }
 
 final class ModeImageView: NSView {
+    var onDoubleClick: (() -> Void)?
+
     private let imageLayer = CALayer()
     private var image: CGImage?
     private var pixelSize: CGSize = .zero
@@ -33,7 +39,7 @@ final class ModeImageView: NSView {
         super.init(frame: frameRect)
         wantsLayer = true
         layer = CALayer()
-        layer?.backgroundColor = NSColor(calibratedWhite: 0.12, alpha: 1).cgColor
+        layer?.backgroundColor = NSColor.black.cgColor
         layer?.masksToBounds = true
 
         imageLayer.contentsGravity = .resize
@@ -104,5 +110,8 @@ final class ModeImageView: NSView {
 
     override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
+        if event.clickCount == 2 {
+            onDoubleClick?()
+        }
     }
 }

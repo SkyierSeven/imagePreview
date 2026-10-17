@@ -5,24 +5,27 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @Bindable var model: ViewerModel
     @Bindable private var shortcuts = ShortcutSettings.shared
+    @Bindable private var reading = ReadingPreferences.shared
 
     @State private var sideControlsVisible = true
     @State private var hideSideControlsTask: Task<Void, Never>?
     @State private var showShortcutSettings = false
 
-    /// Idle seconds before side nav buttons fade out.
     private let sideControlsHideDelay: Duration = .seconds(2)
+
+    private var rtl: Bool { reading.rightToLeft }
 
     var body: some View {
         ZStack {
-            Color(nsColor: NSColor(calibratedWhite: 0.12, alpha: 1))
+            Color.black
 
             if let loaded = model.loadedImage {
                 ImageCanvasView(
                     image: loaded.cgImage,
                     pixelSize: loaded.pixelSize,
                     displayMode: model.displayMode,
-                    rotationDegrees: model.rotationDegrees
+                    rotationDegrees: model.rotationDegrees,
+                    onDoubleClick: { reading.toggleImmersive() }
                 )
                 .clipShape(Rectangle())
             } else {
@@ -41,11 +44,14 @@ struct ContentView: View {
             }
 
             SideNavButtons(
-                canGoPrevious: model.navigator?.canGoPrevious ?? false,
-                canGoNext: model.navigator?.canGoNext ?? false,
+                canGoLeading: rtl ? model.canGoNext : model.canGoPrevious,
+                canGoTrailing: rtl ? model.canGoPrevious : model.canGoNext,
                 visible: sideControlsVisible && model.navigator != nil,
-                onPrevious: { model.goPrevious() },
-                onNext: { model.goNext() }
+                immersive: reading.immersive,
+                leadingHelp: rtl ? "下一页" : "上一张",
+                trailingHelp: rtl ? "上一页" : "下一张",
+                onLeading: { model.navigateLeading(rtl: rtl) },
+                onTrailing: { model.navigateTrailing(rtl: rtl) }
             )
 
             MouseActivityMonitor {
@@ -53,7 +59,7 @@ struct ContentView: View {
             }
             .allowsHitTesting(false)
 
-            // Trackpad / Magic Mouse: one horizontal swipe → one image.
+            // Swipe left → next page, swipe right → previous (manga / Photos style).
             SwipeNavigateMonitor(
                 onPrevious: { model.goPrevious() },
                 onNext: { model.goNext() }
@@ -69,18 +75,23 @@ struct ContentView: View {
         }
         .frame(minWidth: 480, minHeight: 320)
         .navigationTitle(model.windowTitle)
-        .background(WindowChromeConfigurator(fileURL: model.navigator?.currentURL))
+        .background(
+            WindowChromeConfigurator(
+                fileURL: model.navigator?.currentURL,
+                immersive: reading.immersive,
+                onSystemExitFullscreen: { reading.exitImmersive() }
+            )
+        )
         .onDrop(of: [UTType.fileURL], isTargeted: nil, perform: handleDrop)
         .focusable()
         .focusEffectDisabled()
         .onAppear { bumpSideControls() }
-        // Built-in arrows — always on, not customizable / not removable.
         .onKeyPress(.leftArrow) {
-            model.goPrevious()
+            model.navigateLeading(rtl: rtl)
             return .handled
         }
         .onKeyPress(.rightArrow) {
-            model.goNext()
+            model.navigateTrailing(rtl: rtl)
             return .handled
         }
         .onKeyPress(.upArrow) {
@@ -91,7 +102,13 @@ struct ContentView: View {
             model.goNext()
             return .handled
         }
-        // Extra user-defined shortcuts.
+        .onKeyPress(.escape) {
+            if reading.immersive {
+                reading.exitImmersive()
+                return .handled
+            }
+            return .ignored
+        }
         .onKeyPress { press in
             if shortcuts.matchesPrevious(press) {
                 model.goPrevious()
@@ -112,7 +129,7 @@ struct ContentView: View {
             return .handled
         }
         .onKeyPress(keys: [.init("f")]) { _ in
-            model.setDisplayMode(.fill)
+            reading.toggleImmersive()
             return .handled
         }
         .onKeyPress(keys: [.init("s")]) { _ in
@@ -127,9 +144,25 @@ struct ContentView: View {
             }
             return .handled
         }
+        .toolbar(reading.immersive ? .hidden : .automatic)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
+                    Button {
+                        reading.toggleImmersive()
+                    } label: {
+                        Label(
+                            reading.immersive ? "退出沉浸" : "沉浸阅读",
+                            systemImage: reading.immersive ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right"
+                        )
+                    }
+
+                    Toggle(isOn: $reading.rightToLeft) {
+                        Label("从右到左（日漫）", systemImage: "book.pages")
+                    }
+
+                    Divider()
+
                     Picker(
                         "显示模式",
                         selection: Binding(
@@ -169,7 +202,7 @@ struct ContentView: View {
                     Text("更多")
                         .font(.system(size: 13))
                 }
-                .help("显示模式、旋转与快捷键")
+                .help("沉浸、阅读方向、显示与快捷键")
                 .menuIndicator(.hidden)
             }
         }
@@ -211,31 +244,92 @@ struct ContentView: View {
     }
 }
 
-/// Configures titlebar chrome once; never writes `window.title` (avoids fighting SwiftUI).
+/// Titlebar / fullscreen chrome driven by immersive mode.
 private struct WindowChromeConfigurator: NSViewRepresentable {
     var fileURL: URL?
+    var immersive: Bool
+    var onSystemExitFullscreen: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onSystemExitFullscreen: onSystemExitFullscreen)
+    }
 
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
-        DispatchQueue.main.async { Self.apply(fileURL: fileURL, to: view.window) }
+        context.coordinator.installObservers()
+        DispatchQueue.main.async { context.coordinator.apply(fileURL: fileURL, immersive: immersive, to: view.window) }
         return view
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
-        DispatchQueue.main.async { Self.apply(fileURL: fileURL, to: nsView.window) }
+        context.coordinator.onSystemExitFullscreen = onSystemExitFullscreen
+        DispatchQueue.main.async { context.coordinator.apply(fileURL: fileURL, immersive: immersive, to: nsView.window) }
     }
 
-    private static func apply(fileURL: URL?, to window: NSWindow?) {
-        guard let window else { return }
-        window.titleVisibility = .visible
-        window.titlebarAppearsTransparent = false
-        window.toolbarStyle = .unifiedCompact
-        window.titlebarSeparatorStyle = .line
-        if window.styleMask.contains(.fullSizeContentView) {
-            window.styleMask.remove(.fullSizeContentView)
+    static func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
+        coordinator.tearDown()
+    }
+
+    @MainActor
+    final class Coordinator {
+        var onSystemExitFullscreen: () -> Void
+        private var exitObserver: NSObjectProtocol?
+        private var lastImmersive: Bool?
+
+        init(onSystemExitFullscreen: @escaping () -> Void) {
+            self.onSystemExitFullscreen = onSystemExitFullscreen
         }
-        if window.representedURL != fileURL {
-            window.representedURL = fileURL
+
+        func installObservers() {
+            guard exitObserver == nil else { return }
+            exitObserver = NotificationCenter.default.addObserver(
+                forName: NSWindow.didExitFullScreenNotification,
+                object: nil,
+                queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    self?.onSystemExitFullscreen()
+                }
+            }
+        }
+
+        func tearDown() {
+            if let exitObserver {
+                NotificationCenter.default.removeObserver(exitObserver)
+                self.exitObserver = nil
+            }
+        }
+
+        func apply(fileURL: URL?, immersive: Bool, to window: NSWindow?) {
+            guard let window else { return }
+
+            if window.representedURL != fileURL {
+                window.representedURL = fileURL
+            }
+
+            let immersiveChanged = lastImmersive != immersive
+            lastImmersive = immersive
+
+            if immersive {
+                window.titleVisibility = .hidden
+                window.titlebarAppearsTransparent = true
+                window.styleMask.insert(.fullSizeContentView)
+                window.titlebarSeparatorStyle = .none
+                if immersiveChanged, !window.styleMask.contains(.fullScreen) {
+                    window.toggleFullScreen(nil)
+                }
+            } else {
+                window.titleVisibility = .visible
+                window.titlebarAppearsTransparent = false
+                window.toolbarStyle = .unifiedCompact
+                window.titlebarSeparatorStyle = .line
+                if window.styleMask.contains(.fullSizeContentView) {
+                    window.styleMask.remove(.fullSizeContentView)
+                }
+                if immersiveChanged, window.styleMask.contains(.fullScreen) {
+                    window.toggleFullScreen(nil)
+                }
+            }
         }
     }
 }

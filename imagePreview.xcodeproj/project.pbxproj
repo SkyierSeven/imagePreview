@@ -16,6 +16,7 @@
 		A0E1359347540D04BA8AC70B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81353E53179FA14FC1640EF1 /* ContentView.swift */; };
 		C5D437F8264D62751A659B4E /* DisplayMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2647CBBFFD5F857ED36B74D5 /* DisplayMode.swift */; };
 		CA884F511EBEB63503B955E7 /* imagePreviewApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AC9F3A7C6A25AA444DBDDAC /* imagePreviewApp.swift */; };
+		D5C7B5F9A2B0005B27CC2F37 /* ReadingPreferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB4D189DE9632AAA49EE00F /* ReadingPreferences.swift */; };
 		E89914BAB88801E191BE3D7C /* ImageCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33EEEE3883A889E08E038BB9 /* ImageCanvasView.swift */; };
 		F4D3A1F0BEA0D46D308AADF9 /* ImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BB3FDF16D927A46F5449761 /* ImageLoader.swift */; };
 		F667B30FE7A151D7DC6E6929 /* SideNavButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06BA1C28BECB939601229A7 /* SideNavButtons.swift */; };
@@ -30,6 +31,7 @@
 		2E606E53FDC23D913D7D75A3 /* ShortcutSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutSettingsView.swift; sourceTree = "<group>"; };
 		33EEEE3883A889E08E038BB9 /* ImageCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCanvasView.swift; sourceTree = "<group>"; };
 		57F6F235CDCAAB584853BF74 /* ViewerModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewerModel.swift; sourceTree = "<group>"; };
+		5CB4D189DE9632AAA49EE00F /* ReadingPreferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingPreferences.swift; sourceTree = "<group>"; };
 		675EBE5AE0F4AB68088C9E95 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		6AB86BD478332912A3EF74E2 /* SupportedFormats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedFormats.swift; sourceTree = "<group>"; };
 		81353E53179FA14FC1640EF1 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -60,6 +62,7 @@
 				33EEEE3883A889E08E038BB9 /* ImageCanvasView.swift */,
 				1BB3FDF16D927A46F5449761 /* ImageLoader.swift */,
 				0AC9F3A7C6A25AA444DBDDAC /* imagePreviewApp.swift */,
+				5CB4D189DE9632AAA49EE00F /* ReadingPreferences.swift */,
 				AB7C0F5D7CC1486F26DA85DB /* ShortcutSettings.swift */,
 				2E606E53FDC23D913D7D75A3 /* ShortcutSettingsView.swift */,
 				B06BA1C28BECB939601229A7 /* SideNavButtons.swift */,
@@ -160,6 +163,7 @@
 				C5D437F8264D62751A659B4E /* DisplayMode.swift in Sources */,
 				E89914BAB88801E191BE3D7C /* ImageCanvasView.swift in Sources */,
 				F4D3A1F0BEA0D46D308AADF9 /* ImageLoader.swift in Sources */,
+				D5C7B5F9A2B0005B27CC2F37 /* ReadingPreferences.swift in Sources */,
 				49794070A7A5CB9E7AE28E11 /* ShortcutSettings.swift in Sources */,
 				FE452AD6E00F17F0EB60292C /* ShortcutSettingsView.swift in Sources */,
 				F667B30FE7A151D7DC6E6929 /* SideNavButtons.swift in Sources */,
