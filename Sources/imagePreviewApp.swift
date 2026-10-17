@@ -15,6 +15,7 @@ struct imagePreviewApp: App {
         }
         .defaultSize(width: 960, height: 640)
         .windowToolbarStyle(.unifiedCompact)
+        // SwiftUI CommandsBuilder accepts a limited number of children per block.
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button(String(localized: "about_app")) {
@@ -52,6 +53,11 @@ struct imagePreviewApp: App {
                 .keyboardShortcut("o", modifiers: .command)
             }
 
+            CommandGroup(replacing: .help) {
+                Button(String(localized: "app_help")) {}
+            }
+        }
+        .commands {
             CommandGroup(replacing: .saveItem) {}
             CommandGroup(replacing: .printItem) {}
             CommandGroup(replacing: .undoRedo) {}
@@ -60,9 +66,6 @@ struct imagePreviewApp: App {
             CommandGroup(replacing: .textFormatting) {}
             CommandGroup(replacing: .toolbar) {}
             CommandGroup(replacing: .sidebar) {}
-            CommandGroup(replacing: .help) {
-                Button(String(localized: "app_help")) {}
-            }
         }
         .handlesExternalEvents(matching: Set(arrayLiteral: "*"))
     }
