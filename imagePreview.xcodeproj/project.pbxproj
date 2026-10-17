@@ -11,6 +11,7 @@
 		52D5EAF37A7147342009225C /* DirectoryNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC8D1E8E7D8E5B9B36E170D9 /* DirectoryNavigator.swift */; };
 		5C88379D825B10314C113160 /* ViewerModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57F6F235CDCAAB584853BF74 /* ViewerModel.swift */; };
 		6DAB762BDD679214DD0F175A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 851E71DE0030E46DA5237FC0 /* Assets.xcassets */; };
+		797F61EE0B6931831C59028B /* SwipeNavigateMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = CADA3553215D02CCBF57F4F0 /* SwipeNavigateMonitor.swift */; };
 		9426BEB301AA98454C4AC47E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675EBE5AE0F4AB68088C9E95 /* AppDelegate.swift */; };
 		A0E1359347540D04BA8AC70B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81353E53179FA14FC1640EF1 /* ContentView.swift */; };
 		C5D437F8264D62751A659B4E /* DisplayMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2647CBBFFD5F857ED36B74D5 /* DisplayMode.swift */; };
@@ -37,6 +38,7 @@
 		B06BA1C28BECB939601229A7 /* SideNavButtons.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideNavButtons.swift; sourceTree = "<group>"; };
 		B0769923A8B1167E640D499C /* imagePreview.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = imagePreview.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC8D1E8E7D8E5B9B36E170D9 /* DirectoryNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectoryNavigator.swift; sourceTree = "<group>"; };
+		CADA3553215D02CCBF57F4F0 /* SwipeNavigateMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeNavigateMonitor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -62,6 +64,7 @@
 				2E606E53FDC23D913D7D75A3 /* ShortcutSettingsView.swift */,
 				B06BA1C28BECB939601229A7 /* SideNavButtons.swift */,
 				6AB86BD478332912A3EF74E2 /* SupportedFormats.swift */,
+				CADA3553215D02CCBF57F4F0 /* SwipeNavigateMonitor.swift */,
 				57F6F235CDCAAB584853BF74 /* ViewerModel.swift */,
 			);
 			path = Sources;
@@ -161,6 +164,7 @@
 				FE452AD6E00F17F0EB60292C /* ShortcutSettingsView.swift in Sources */,
 				F667B30FE7A151D7DC6E6929 /* SideNavButtons.swift in Sources */,
 				F7A6DFE1EC957A45C9EFEBB5 /* SupportedFormats.swift in Sources */,
+				797F61EE0B6931831C59028B /* SwipeNavigateMonitor.swift in Sources */,
 				5C88379D825B10314C113160 /* ViewerModel.swift in Sources */,
 				CA884F511EBEB63503B955E7 /* imagePreviewApp.swift in Sources */,
 			);

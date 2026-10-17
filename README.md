@@ -40,6 +40,7 @@ open build/Build/Products/Release/imagePreview.app
 | ← → ↑ ↓ | Previous / next image (built-in, always on) |
 | Custom | Extra prev/next keys via 更多 → 自定义切图快捷键 |
 | Side buttons | Appear on mouse move; hide after 2s idle |
+| Trackpad swipe | Two-finger left/right → next/previous (one image per swipe) |
 | 0 | Fit |
 | F | Fill |
 | 1 | Actual size |

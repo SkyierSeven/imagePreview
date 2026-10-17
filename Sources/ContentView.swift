@@ -53,6 +53,13 @@ struct ContentView: View {
             }
             .allowsHitTesting(false)
 
+            // Trackpad / Magic Mouse: one horizontal swipe → one image.
+            SwipeNavigateMonitor(
+                onPrevious: { model.goPrevious() },
+                onNext: { model.goNext() }
+            )
+            .allowsHitTesting(false)
+
             if model.isLoading {
                 ProgressView()
                     .controlSize(.small)
